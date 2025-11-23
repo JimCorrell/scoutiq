@@ -368,9 +368,15 @@ class LahmanDataLoader:
             )
 
             if len(merged) > 0:
-                features_list.append(hist_agg)
+                # Extract features (all hist columns) and targets
+                target_cols = ["AVG", "OBP", "SLG", "OPS", "HR", "RBI", "SB"]
+                # Drop target columns and any yearID_target if it exists
+                cols_to_drop = target_cols + [col for col in merged.columns if col.endswith("_target")]
+                feature_cols = [col for col in merged.columns if col not in cols_to_drop]
+                
+                features_list.append(merged[feature_cols])
                 targets_list.append(
-                    merged[["playerID", "AVG", "OBP", "SLG", "OPS", "HR", "RBI", "SB"]]
+                    merged[["playerID"] + target_cols]
                 )
 
         if features_list:

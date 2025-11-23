@@ -1,5 +1,5 @@
 """
-"""Machine Learning models for baseball prospect projections
+Machine Learning models for baseball prospect projections
 """
 
 import numpy as np
@@ -414,9 +414,7 @@ class DeepLearningModel(BaseModel):
         # Loss and optimizer
         criterion = nn.MSELoss()
         optimizer = optim.Adam(
-            self.model.parameters(),
-            lr=self.config["learning_rate"],
-            weight_decay=1e-5
+            self.model.parameters(), lr=self.config["learning_rate"], weight_decay=1e-5
         )
 
         # Training loop
@@ -595,7 +593,7 @@ class ModelTrainer:
         self,
         X_train: pd.DataFrame,
         y_train: pd.DataFrame,
-        x_val: Optional[pd.DataFrame] = None,
+        X_val: Optional[pd.DataFrame] = None,
         y_val: Optional[pd.DataFrame] = None,
     ) -> Dict[str, Dict[str, BaseModel]]:
         """
@@ -628,14 +626,14 @@ class ModelTrainer:
             # Train XGBoost
             if "xgboost" in self.config.get("active_models", []):
                 xgb_model = XGBoostModel(self.config.get("xgboost"))
-                eval_set = (x_val, y_target_val) if x_val is not None else None
+                eval_set = (X_val, y_target_val) if X_val is not None else None
                 xgb_model.train(X_train, y_target_train, eval_set)
                 self.models[target]["xgboost"] = xgb_model
 
             # Train LightGBM
             if "lightgbm" in self.config.get("active_models", []):
                 lgb_model = LightGBMModel(self.config.get("lightgbm"))
-                eval_set = (x_val, y_target_val) if x_val is not None else None
+                eval_set = (X_val, y_target_val) if X_val is not None else None
                 lgb_model.train(X_train, y_target_train, eval_set)
                 self.models[target]["lightgbm"] = lgb_model
 
@@ -644,7 +642,7 @@ class ModelTrainer:
                 dl_model = DeepLearningModel(
                     input_dim=X_train.shape[1], config=self.config.get("deep_learning")
                 )
-                dl_model.train(X_train, y_target_train, x_val, y_target_val)
+                dl_model.train(X_train, y_target_train, X_val, y_target_val)
                 self.models[target]["deep_learning"] = dl_model
 
         logger.info("Model training complete")
