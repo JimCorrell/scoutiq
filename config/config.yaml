@@ -1,0 +1,194 @@
+# ScoutIQ Configuration
+
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  models_dir: "data/models"
+
+  # Data sources
+  structured_data: "prospect_stats.csv"
+  unstructured_data: "scouting_reports.csv"
+
+  # Train/test split
+  test_size: 0.2
+  validation_size: 0.1
+  random_seed: 42
+
+nlp:
+  # Model selection
+  spacy_model: "en_core_web_lg"
+  transformer_model: "bert-base-uncased"
+
+  # Text processing
+  max_text_length: 512
+  min_text_length: 10
+
+  # Entity recognition
+  custom_entities:
+    - "TOOL_GRADE" # e.g., "plus hit tool", "70-grade fastball"
+    - "SKILL" # e.g., "power", "speed", "command"
+    - "CONCERN" # e.g., "injury history", "swing and miss"
+
+  # Sentiment analysis
+  use_sentiment: true
+  sentiment_threshold: 0.3
+
+features:
+  # Structured features
+  statistical_features:
+    - "age"
+    - "level"
+    - "pa" # plate appearances
+    - "avg"
+    - "obp"
+    - "slg"
+    - "hr"
+    - "sb"
+    - "bb_rate"
+    - "k_rate"
+    - "iso"
+    - "babip"
+
+  # Derived features
+  create_interactions: true
+  polynomial_degree: 2
+
+  # NLP-derived features
+  nlp_features:
+    - "tool_grades"
+    - "scout_sentiment"
+    - "power_mentions"
+    - "speed_mentions"
+    - "injury_concerns"
+    - "report_length"
+    - "report_count"
+
+  # Time-based features
+  temporal_features:
+    - "age_at_level"
+    - "days_at_level"
+    - "performance_trend"
+    - "recent_performance"
+
+models:
+  # Model types to train
+  active_models:
+    - "random_forest"
+    - "xgboost"
+    - "lightgbm"
+    - "deep_learning"
+    - "ensemble"
+
+  # Random Forest
+  random_forest:
+    n_estimators: 200
+    max_depth: 15
+    min_samples_split: 10
+    min_samples_leaf: 5
+    n_jobs: -1
+
+  # XGBoost
+  xgboost:
+    n_estimators: 300
+    max_depth: 8
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    objective: "reg:squarederror"
+
+  # LightGBM
+  lightgbm:
+    n_estimators: 300
+    max_depth: 8
+    learning_rate: 0.05
+    num_leaves: 31
+    subsample: 0.8
+    colsample_bytree: 0.8
+
+  # Deep Learning
+  deep_learning:
+    hidden_layers: [256, 128, 64]
+    dropout: 0.3
+    learning_rate: 0.001
+    batch_size: 32
+    epochs: 100
+    early_stopping_patience: 10
+
+  # Ensemble
+  ensemble:
+    method: "stacking" # or "voting"
+    meta_learner: "linear"
+
+projections:
+  # Target variables
+  batting_targets:
+    - "mlb_avg"
+    - "mlb_obp"
+    - "mlb_slg"
+    - "mlb_hr"
+    - "mlb_sb"
+    - "mlb_war"
+
+  pitching_targets:
+    - "mlb_era"
+    - "mlb_whip"
+    - "mlb_k9"
+    - "mlb_bb9"
+    - "mlb_war"
+
+  # Classification targets
+  classification_targets:
+    - "reaches_majors" # binary
+    - "player_tier" # star, regular, bench, bust
+
+  # Time-based projections
+  projection_horizons:
+    - 1 # years
+    - 3
+    - 5
+
+training:
+  # Cross-validation
+  cv_folds: 5
+  cv_strategy: "stratified" # or "time_series"
+
+  # Hyperparameter tuning
+  tune_hyperparameters: true
+  tuning_method: "bayesian" # or "grid", "random"
+  tuning_iterations: 50
+
+  # Feature selection
+  feature_selection: true
+  feature_selection_method: "shap" # or "permutation", "recursive"
+  max_features: 50
+
+evaluation:
+  # Metrics
+  regression_metrics:
+    - "mae"
+    - "rmse"
+    - "r2"
+    - "mape"
+
+  classification_metrics:
+    - "accuracy"
+    - "precision"
+    - "recall"
+    - "f1"
+    - "auc_roc"
+
+  # Generate reports
+  create_plots: true
+  feature_importance: true
+  shap_analysis: true
+
+mlflow:
+  # Experiment tracking
+  enabled: true
+  experiment_name: "prospect_projections"
+  tracking_uri: "mlruns"
+
+  # Artifact logging
+  log_models: true
+  log_plots: true
+  log_metrics: true
