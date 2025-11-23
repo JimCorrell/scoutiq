@@ -73,7 +73,7 @@ class StatisticalFeatureEngineer:
         df = df.copy()
 
         # wOBA weights (approximate 2024 values)
-        wOBA_weights = {
+        woba_weights = {
             "bb": 0.69,
             "hbp": 0.72,
             "1b": 0.88,
@@ -87,12 +87,12 @@ class StatisticalFeatureEngineer:
             df["1b"] = df["h"] - df.get("2b", 0) - df.get("3b", 0) - df["hr"]
 
             numerator = (
-                wOBA_weights["bb"] * df.get("bb", 0)
-                + wOBA_weights["hbp"] * df.get("hbp", 0)
-                + wOBA_weights["1b"] * df["1b"]
-                + wOBA_weights["2b"] * df.get("2b", 0)
-                + wOBA_weights["3b"] * df.get("3b", 0)
-                + wOBA_weights["hr"] * df["hr"]
+                woba_weights["bb"] * df.get("bb", 0)
+                + woba_weights["hbp"] * df.get("hbp", 0)
+                + woba_weights["1b"] * df["1b"]
+                + woba_weights["2b"] * df.get("2b", 0)
+                + woba_weights["3b"] * df.get("3b", 0)
+                + woba_weights["hr"] * df["hr"]
             )
 
             denominator = (

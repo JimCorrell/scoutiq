@@ -7,8 +7,8 @@ import numpy as np
 from pathlib import Path
 import random
 
-# Set random seed
-np.random.seed(42)
+# Set random seed and create generator
+rng = np.random.default_rng(42)
 random.seed(42)
 
 # Configuration
@@ -28,25 +28,25 @@ def generate_player_stats():
         player_id = f"P{i+1:04d}"
 
         # Demographics
-        age = np.random.randint(18, 28)
+        age = rng.integers(18, 28)
         level = random.choice(levels)
 
         # Batting stats
-        pa = np.random.randint(200, 600)
+        pa = rng.integers(200, 600)
         ab = int(pa * 0.85)
 
         # Generate correlated batting stats
-        true_talent = np.random.normal(0.260, 0.030)
+        true_talent = rng.normal(0.260, 0.030)
         h = int(ab * true_talent)
 
         doubles = int(h * 0.20)
         triples = int(h * 0.02)
-        hr = np.random.poisson(15)
+        hr = rng.poisson(15)
 
-        bb = int(pa * np.random.uniform(0.08, 0.15))
-        k = int(pa * np.random.uniform(0.15, 0.30))
-        sb = np.random.poisson(10)
-        cs = np.random.poisson(3)
+        bb = int(pa * rng.uniform(0.08, 0.15))
+        k = int(pa * rng.uniform(0.15, 0.30))
+        sb = rng.poisson(10)
+        cs = rng.poisson(3)
 
         avg = h / ab if ab > 0 else 0
         obp = (h + bb) / pa if pa > 0 else 0
@@ -65,7 +65,7 @@ def generate_player_stats():
         mlb_slg = min(max(slg * 0.92 * aging_factor, 0.320), 0.600)
         mlb_hr = int(hr * 0.9 * aging_factor)
         mlb_sb = int(sb * 0.85 * aging_factor)
-        mlb_war = np.random.normal(2.0, 1.5)
+        mlb_war = rng.normal(2.0, 1.5)
 
         data.append(
             {
@@ -179,7 +179,7 @@ def generate_scouting_reports(player_stats):
             {
                 "player_id": player["player_id"],
                 "report_date": "2024-06-15",
-                "scout_name": f"Scout {np.random.randint(1, 20)}",
+                "scout_name": f"Scout {rng.integers(1, 20)}",
                 "report_text": report_text,
             }
         )

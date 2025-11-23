@@ -193,7 +193,7 @@ class ProspectProjectionPipeline:
         # Split training data for validation
         from sklearn.model_selection import train_test_split
 
-        X_tr, X_val, y_tr, y_val = train_test_split(
+        x_tr, x_val, y_tr, y_val = train_test_split(
             X_train,
             y_train,
             test_size=self.config["data"]["validation_size"],
@@ -201,7 +201,7 @@ class ProspectProjectionPipeline:
         )
 
         # Train models
-        self.models = self.model_trainer.train_models(X_tr, y_tr, X_val, y_val)
+        self.models = self.model_trainer.train_models(x_tr, y_tr, x_val, y_val)
 
         # Create ensembles
         self.ensembles = self.model_trainer.create_ensembles()

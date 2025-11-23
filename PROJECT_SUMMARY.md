@@ -51,7 +51,7 @@ ScoutIQ is a comprehensive NLP and AI solution for analyzing baseball prospect d
 
 ### Configuration & Tools
 
-7. **Configuration** (`config/config.yaml`)
+1. **Configuration** (`config/config.yaml`)
 
    - Data paths and processing options
    - NLP settings (models, entity types)
@@ -59,29 +59,29 @@ ScoutIQ is a comprehensive NLP and AI solution for analyzing baseball prospect d
    - Model hyperparameters
    - Training and evaluation settings
 
-8. **Utilities** (`src/utils/`)
+2. **Utilities** (`src/utils/`)
 
    - Configuration management
    - Logging setup
    - Helper functions
 
-9. **Scripts** (`scripts/`)
+3. **Scripts** (`scripts/`)
 
    - `generate_sample_data.py`: Generate synthetic test data
    - `run_example.py`: Example usage
 
-10. **Examples** (`examples/`)
+4. **Examples** (`examples/`)
 
-    - `comprehensive_example.py`: Full demonstration
+   - `comprehensive_example.py`: Full demonstration
 
-11. **Tests** (`tests/`)
+5. **Tests** (`tests/`)
 
-    - Unit tests for core components
+   - Unit tests for core components
 
-12. **Documentation**
-    - `README.md`: Project overview
-    - `SETUP.md`: Setup and usage guide
-    - `CONTRIBUTING.md`: Contribution guidelines
+6. **Documentation**
+   - `README.md`: Project overview
+   - `SETUP.md`: Setup and usage guide
+   - `CONTRIBUTING.md`: Contribution guidelines
 
 ## Key Features
 

@@ -1,11 +1,18 @@
 """
-Comprehensive example demonstrating all ScoutIQ features
+"""Comprehensive example demonstrating all ScoutIQ features
 """
 
 from pathlib import Path
 import pandas as pd
+import numpy as np
 from src.pipeline import ProspectProjectionPipeline
 from src.utils import setup_logger
+
+# Constants
+DATA_RAW = "data/raw"
+
+# Initialize random generator
+rng = np.random.default_rng(42)
 
 logger = setup_logger("comprehensive_example")
 
@@ -19,16 +26,16 @@ def demonstrate_data_loading():
     from src.data_ingestion import StructuredDataLoader, UnstructuredDataLoader
 
     # Load structured data
-    struct_loader = StructuredDataLoader("data/raw")
+    struct_loader = StructuredDataLoader(DATA_RAW)
     stats_df = struct_loader.load_csv("prospect_stats.csv")
     print(f"\n✓ Loaded {len(stats_df)} player statistics")
     print(f"  Columns: {list(stats_df.columns[:10])}...")
 
     # Load scouting reports
-    text_loader = UnstructuredDataLoader("data/raw")
+    text_loader = UnstructuredDataLoader(DATA_RAW)
     reports_df = text_loader.load_scouting_reports("scouting_reports.csv")
     print(f"\n✓ Loaded {len(reports_df)} scouting reports")
-    print(f"\n  Sample report:")
+    print("\n  Sample report:")
     print(f"  {reports_df.iloc[0]['report_text'][:200]}...")
 
     return stats_df, reports_df
@@ -102,16 +109,14 @@ def demonstrate_model_training():
     print("=" * 80)
 
     from src.models import RandomForestModel, XGBoostModel
-    import numpy as np
 
     # Create synthetic training data for demo
-    np.random.seed(42)
     X_train = pd.DataFrame(
-        np.random.randn(100, 10), columns=[f"feature_{i}" for i in range(10)]
+        rng.standard_normal((100, 10)), columns=[f"feature_{i}" for i in range(10)]
     )
-    y_train = pd.Series(np.random.randn(100), name="target")
+    y_train = pd.Series(rng.standard_normal(100), name="target")
     X_test = pd.DataFrame(
-        np.random.randn(20, 10), columns=[f"feature_{i}" for i in range(10)]
+        rng.standard_normal((20, 10)), columns=[f"feature_{i}" for i in range(10)]
     )
 
     # Train Random Forest
@@ -198,8 +203,8 @@ def demonstrate_full_pipeline():
 
     projections = pipeline.predict(player_id=player_id, use_ensemble=True)
 
-    print(f"\n  Player: {player_name} (ID: {player_id})")
-    print(f"  Projections:")
+    print(f\"\\n  Player: {player_name} (ID: {player_id})\")
+    print(\"  Projections:\")
     for target, values in projections.items():
         pred = values["prediction"]
         unc = values.get("uncertainty", 0)
@@ -223,12 +228,12 @@ def main():
     try:
         # Individual component demonstrations
         stats_df, reports_df = demonstrate_data_loading()
-        nlp_features = demonstrate_nlp_processing(reports_df)
-        engineered_features = demonstrate_feature_engineering(stats_df)
-        model = demonstrate_model_training()
+        _ = demonstrate_nlp_processing(reports_df)
+        _ = demonstrate_feature_engineering(stats_df)
+        _ = demonstrate_model_training()
 
         # Full pipeline
-        pipeline = demonstrate_full_pipeline()
+        _ = demonstrate_full_pipeline()
 
         print("\n" + "=" * 80)
         print("DEMONSTRATION COMPLETE!")

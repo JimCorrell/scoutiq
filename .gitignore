@@ -16,9 +16,19 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
+*.manifest
+*.spec
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
 
 # Virtual Environment
 venv/
@@ -37,14 +47,19 @@ ENV/
 .ipynb_checkpoints
 *.ipynb_checkpoints
 
-# Data
+# Data files (keep directory structure)
 data/raw/*.csv
 data/raw/*.json
-data/processed/
-data/models/
+data/raw/*.parquet
+data/processed/**/*
+data/models/**/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/models/.gitkeep
 
 # Logs
-logs/
+logs/**/*
+!logs/.gitkeep
 *.log
 
 # MLflow
@@ -52,10 +67,8 @@ mlruns/
 mlartifacts/
 
 # Results
-results/
-*.png
-*.jpg
-*.pdf
+results/**/*
+!results/.gitkeep
 
 # OS
 .DS_Store
@@ -71,3 +84,8 @@ Thumbs.db
 # Temporary files
 *.tmp
 temp/
+.cache/
+
+# Environment variables
+.env
+.env.local

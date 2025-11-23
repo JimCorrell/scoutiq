@@ -1,5 +1,5 @@
 """
-Machine Learning models for baseball prospect projections
+"""Machine Learning models for baseball prospect projections
 """
 
 import numpy as np
@@ -7,6 +7,9 @@ import pandas as pd
 from typing import Dict, List, Optional, Tuple, Any
 import joblib
 from pathlib import Path
+
+# Constants
+NOT_TRAINED_ERROR = "Model not trained"
 
 try:
     from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
@@ -129,7 +132,7 @@ class RandomForestModel(BaseModel):
         self.model.fit(X, y)
         self.is_trained = True
 
-        logger.info(f"Random Forest training complete")
+        logger.info("Random Forest training complete")
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:
         """
@@ -154,7 +157,7 @@ class RandomForestModel(BaseModel):
             Series of feature importances
         """
         if not self.is_trained:
-            raise ValueError("Model not trained")
+            raise ValueError(NOT_TRAINED_ERROR)
 
         return pd.Series(
             self.model.feature_importances_, index=self.model.feature_names_in_
@@ -222,7 +225,7 @@ class XGBoostModel(BaseModel):
             Predictions
         """
         if not self.is_trained:
-            raise ValueError("Model not trained")
+            raise ValueError(NOT_TRAINED_ERROR)
 
         return self.model.predict(X)
 
@@ -234,7 +237,7 @@ class XGBoostModel(BaseModel):
             Series of feature importances
         """
         if not self.is_trained:
-            raise ValueError("Model not trained")
+            raise ValueError(NOT_TRAINED_ERROR)
 
         importance_dict = self.model.get_booster().get_score(importance_type="weight")
         return pd.Series(importance_dict).sort_values(ascending=False)
@@ -307,7 +310,7 @@ class LightGBMModel(BaseModel):
             Predictions
         """
         if not self.is_trained:
-            raise ValueError("Model not trained")
+            raise ValueError(NOT_TRAINED_ERROR)
 
         return self.model.predict(X)
 
@@ -319,7 +322,7 @@ class LightGBMModel(BaseModel):
             Series of feature importances
         """
         if not self.is_trained:
-            raise ValueError("Model not trained")
+            raise ValueError(NOT_TRAINED_ERROR)
 
         return pd.Series(
             self.model.feature_importances_, index=self.model.feature_name_
@@ -384,7 +387,7 @@ class DeepLearningModel(BaseModel):
         self,
         X: pd.DataFrame,
         y: pd.Series,
-        X_val: Optional[pd.DataFrame] = None,
+        x_val: Optional[pd.DataFrame] = None,
         y_val: Optional[pd.Series] = None,
     ) -> None:
         """
@@ -393,7 +396,7 @@ class DeepLearningModel(BaseModel):
         Args:
             X: Training features
             y: Training targets
-            X_val: Validation features
+            x_val: Validation features
             y_val: Validation targets
         """
         logger.info(f"Training Deep Learning model with {len(X)} samples")
@@ -405,12 +408,16 @@ class DeepLearningModel(BaseModel):
         # Create data loader
         dataset = torch.utils.data.TensorDataset(X_tensor, y_tensor)
         dataloader = DataLoader(
-            dataset, batch_size=self.config["batch_size"], shuffle=True
+            dataset, batch_size=self.config["batch_size"], shuffle=True, num_workers=0
         )
 
         # Loss and optimizer
         criterion = nn.MSELoss()
-        optimizer = optim.Adam(self.model.parameters(), lr=self.config["learning_rate"])
+        optimizer = optim.Adam(
+            self.model.parameters(),
+            lr=self.config["learning_rate"],
+            weight_decay=1e-5
+        )
 
         # Training loop
         best_val_loss = float("inf")
@@ -420,9 +427,9 @@ class DeepLearningModel(BaseModel):
             self.model.train()
             epoch_loss = 0
 
-            for batch_X, batch_y in dataloader:
+            for batch_x, batch_y in dataloader:
                 optimizer.zero_grad()
-                outputs = self.model(batch_X)
+                outputs = self.model(batch_x)
                 loss = criterion(outputs, batch_y)
                 loss.backward()
                 optimizer.step()
@@ -431,8 +438,8 @@ class DeepLearningModel(BaseModel):
             avg_loss = epoch_loss / len(dataloader)
 
             # Validation
-            if X_val is not None and y_val is not None:
-                val_loss = self._validate(X_val, y_val, criterion)
+            if x_val is not None and y_val is not None:
+                val_loss = self._validate(x_val, y_val, criterion)
 
                 if val_loss < best_val_loss:
                     best_val_loss = val_loss
@@ -455,12 +462,12 @@ class DeepLearningModel(BaseModel):
         self.is_trained = True
         logger.info("Deep Learning training complete")
 
-    def _validate(self, X_val: pd.DataFrame, y_val: pd.Series, criterion) -> float:
+    def _validate(self, x_val: pd.DataFrame, y_val: pd.Series, criterion) -> float:
         """
         Validate model
 
         Args:
-            X_val: Validation features
+            x_val: Validation features
             y_val: Validation targets
             criterion: Loss function
 
@@ -469,11 +476,11 @@ class DeepLearningModel(BaseModel):
         """
         self.model.eval()
 
-        X_val_tensor = torch.FloatTensor(X_val.values).to(self.device)
+        x_val_tensor = torch.FloatTensor(x_val.values).to(self.device)
         y_val_tensor = torch.FloatTensor(y_val.values).reshape(-1, 1).to(self.device)
 
         with torch.no_grad():
-            outputs = self.model(X_val_tensor)
+            outputs = self.model(x_val_tensor)
             val_loss = criterion(outputs, y_val_tensor).item()
 
         return val_loss
@@ -489,13 +496,13 @@ class DeepLearningModel(BaseModel):
             Predictions
         """
         if not self.is_trained:
-            raise ValueError("Model not trained")
+            raise ValueError(NOT_TRAINED_ERROR)
 
         self.model.eval()
-        X_tensor = torch.FloatTensor(X.values).to(self.device)
+        x_tensor = torch.FloatTensor(X.values).to(self.device)
 
         with torch.no_grad():
-            predictions = self.model(X_tensor)
+            predictions = self.model(x_tensor).cpu().numpy()
 
         return predictions.cpu().numpy().flatten()
 
@@ -588,7 +595,7 @@ class ModelTrainer:
         self,
         X_train: pd.DataFrame,
         y_train: pd.DataFrame,
-        X_val: Optional[pd.DataFrame] = None,
+        x_val: Optional[pd.DataFrame] = None,
         y_val: Optional[pd.DataFrame] = None,
     ) -> Dict[str, Dict[str, BaseModel]]:
         """
@@ -621,14 +628,14 @@ class ModelTrainer:
             # Train XGBoost
             if "xgboost" in self.config.get("active_models", []):
                 xgb_model = XGBoostModel(self.config.get("xgboost"))
-                eval_set = (X_val, y_target_val) if X_val is not None else None
+                eval_set = (x_val, y_target_val) if x_val is not None else None
                 xgb_model.train(X_train, y_target_train, eval_set)
                 self.models[target]["xgboost"] = xgb_model
 
             # Train LightGBM
             if "lightgbm" in self.config.get("active_models", []):
                 lgb_model = LightGBMModel(self.config.get("lightgbm"))
-                eval_set = (X_val, y_target_val) if X_val is not None else None
+                eval_set = (x_val, y_target_val) if x_val is not None else None
                 lgb_model.train(X_train, y_target_train, eval_set)
                 self.models[target]["lightgbm"] = lgb_model
 
@@ -637,7 +644,7 @@ class ModelTrainer:
                 dl_model = DeepLearningModel(
                     input_dim=X_train.shape[1], config=self.config.get("deep_learning")
                 )
-                dl_model.train(X_train, y_target_train, X_val, y_target_val)
+                dl_model.train(X_train, y_target_train, x_val, y_target_val)
                 self.models[target]["deep_learning"] = dl_model
 
         logger.info("Model training complete")

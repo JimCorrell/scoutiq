@@ -141,7 +141,7 @@ class StructuredDataLoader:
                 try:
                     df[col] = pd.to_datetime(df[col])
                     logger.info(f"Converted {col} to datetime")
-                except:
+                except (ValueError, TypeError):
                     pass
 
         return df
